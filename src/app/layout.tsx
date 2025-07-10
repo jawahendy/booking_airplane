@@ -9,6 +9,19 @@ export const metadata: Metadata = {
   title: 'Booking Online Airplane.',
   description:
     'Welcome to Booking Online Airplane.',
+  icons: {
+    icon: [
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+      {
+        url: '/favicon.ico',
+        sizes: '32x32',
+        type: 'image/x-icon',
+      }
+    ],
+  },
   openGraph: mergeOpenGraph({
     title: 'Booking Online Airplane.',
     description:
