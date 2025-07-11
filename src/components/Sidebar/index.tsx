@@ -9,10 +9,10 @@ import {
   CalendarIcon,
   UserIcon
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useAppContext } from '@/contexts/AppContext';
 
 const Sidebar = () => {
-  const [selectedItem, setSelectedItem] = useState('home');
+  const { activePage, setActivePage } = useAppContext();
 
   const menuItems = [
     {
@@ -42,13 +42,13 @@ const Sidebar = () => {
           <List className="p-0 ">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
-              const isSelected = selectedItem === item.id;
+              const isSelected = activePage === item.id;
               
               return (
                 <div key={item.id} className="mb-4">
                   {/* @ts-expect-error Material Tailwind props */}
                   <ListItem
-                    onClick={() => setSelectedItem(item.id)}
+                    onClick={() => setActivePage(item.id as 'home' | 'calendar' | 'profile')}
                     className={`
                       w-12 h-12 rounded-xl transition-all duration-200 hover:bg-blue-50 cursor-pointer p-0 flex justify-center items-center
                       ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : 'text-gray-700'}

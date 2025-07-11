@@ -5,6 +5,8 @@ import { mergeOpenGraph } from "@/lib/mergeOpenGraph";
 import MotionLazy from "@/components/MotionLazy";
 import Sidebar from "@/components/Sidebar";
 import MobileNavigation from "@/components/MobileNavigation";
+import { AppProvider } from "@/contexts/AppContext";
+import MainContent from "@/components/MainContent";
 
 
 export const metadata: Metadata = {
@@ -31,23 +33,21 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout() {
   return (
     <html lang="en">
       <body
         className={`${montserrat.variable} ${inter.variable} ${poppins.variable} antialiased font-montserrat`}
       >
-        <div className="flex">
-          <Sidebar />
-          <MobileNavigation />
-          <div className="flex-1">
-            <MotionLazy>{children}</MotionLazy>
+        <AppProvider>
+          <div className="flex">
+            <Sidebar />
+            <MobileNavigation />
+            <MotionLazy>
+              <MainContent />
+            </MotionLazy>
           </div>
-        </div>
+        </AppProvider>
       </body>
     </html>
   );

@@ -16,10 +16,11 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useState } from "react";
+import { useAppContext } from '@/contexts/AppContext';
 
 const MobileNavigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState('home');
+  const { activePage, setActivePage } = useAppContext();
 
   const menuItems = [
     {
@@ -85,14 +86,14 @@ const MobileNavigation = () => {
         <List>
           {menuItems.map((item) => {
             const IconComponent = item.icon;
-            const isSelected = selectedItem === item.id;
+            const isSelected = activePage === item.id;
             
             return (
               <div key={item.id} className="mb-3">
                 {/* @ts-expect-error Material Tailwind props */}
                 <ListItem
                   onClick={() => {
-                    setSelectedItem(item.id);
+                    setActivePage(item.id as 'home' | 'calendar' | 'profile');
                     toggleDrawer();
                   }}
                   className={`
