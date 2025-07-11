@@ -3,6 +3,8 @@ import "./globals.css";
 import { inter, montserrat, poppins } from "@/constants/fonts";
 import { mergeOpenGraph } from "@/lib/mergeOpenGraph";
 import MotionLazy from "@/components/MotionLazy";
+import Sidebar from "@/components/Sidebar";
+import MobileNavigation from "@/components/MobileNavigation";
 
 
 export const metadata: Metadata = {
@@ -39,7 +41,13 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${inter.variable} ${poppins.variable} antialiased font-montserrat`}
       >
-        <MotionLazy>{children}</MotionLazy>
+        <div className="flex">
+          <Sidebar />
+          <MobileNavigation />
+          <div className="flex-1">
+            <MotionLazy>{children}</MotionLazy>
+          </div>
+        </div>
       </body>
     </html>
   );
