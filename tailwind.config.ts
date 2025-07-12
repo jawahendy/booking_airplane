@@ -13,6 +13,10 @@ const config: Config = {
   ],
   theme: {
 	extend: {
+		screens: {
+			'xs': '475px',
+			'xxs': '320px',
+		},
 		invRad: {
 			'4.5': '1.125rem'
 		},
