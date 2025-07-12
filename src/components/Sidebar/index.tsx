@@ -50,12 +50,19 @@ const Sidebar = () => {
                   <ListItem
                     onClick={() => setActivePage(item.id as 'home' | 'calendar' | 'profile')}
                     className={`
-                      w-12 h-12 rounded-xl transition-all duration-200 hover:bg-blue-50 cursor-pointer p-0 flex justify-center items-center
-                      ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : 'text-gray-700'}
+                      group w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer p-0 flex justify-center items-center
+                      ${isSelected 
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-500 hover:shadow-md'
+                      }
                     `}
                   >
                     <IconComponent 
-                      className={`h-7 w-7 ${isSelected ? 'text-white' : 'text-gray-600'}`} 
+                      className={`h-7 w-7 transition-colors duration-200 ${
+                        isSelected 
+                          ? 'text-white' 
+                          : 'text-gray-600 group-hover:text-blue-500'
+                      }`} 
                     />
                   </ListItem>
                 </div>

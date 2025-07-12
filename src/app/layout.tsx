@@ -35,12 +35,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout() {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${montserrat.variable} ${inter.variable} ${poppins.variable} antialiased font-montserrat`}
+        className={`${montserrat.variable} ${inter.variable} ${poppins.variable} antialiased font-montserrat h-full`}
       >
         <AppProvider>
-          <div className="flex">
+          <div className="flex h-full min-h-screen">
             <Sidebar />
             <MobileNavigation />
             <MotionLazy>

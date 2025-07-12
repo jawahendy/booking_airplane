@@ -21,7 +21,7 @@ const MainContent = () => {
   };
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 min-h-screen">
       {renderPage()}
     </div>
   );

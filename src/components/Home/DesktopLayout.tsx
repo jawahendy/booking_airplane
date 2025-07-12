@@ -13,11 +13,11 @@ import { ANIMATIONS } from "./animationConfig";
 const DesktopLayout: React.FC = () => {
     return (
         <m.div 
-            className={`hidden lg:block min-h-screen w-full h-full bg-gray-50 relative overflow-hidden ${THEME.spacing.desktop.padding}`}
+            className={`hidden lg:block min-h-screen w-full bg-gray-50 relative overflow-hidden ${THEME.spacing.desktop.padding}`}
             {...ANIMATIONS.container}
         >
             {/* @ts-expect-error Material Tailwind props */}
-            <Card className={`w-full h-full shadow-2xl ${THEME.borderRadius.desktop} relative overflow-hidden`}>
+            <Card className={`w-full h-[calc(100vh-4rem)] shadow-2xl ${THEME.borderRadius.desktop} relative overflow-hidden`}>
                 <m.div 
                     className="relative z-10 h-full flex items-center"
                     initial={{ opacity: 0, scale: 0.95 }}
