@@ -30,7 +30,7 @@ const MobileNavigation = () => {
     },
     {
       id: 'calendar',
-      label: 'Calendar',
+      label: 'Booking',
       icon: CalendarIcon,
     },
     {

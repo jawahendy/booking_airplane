@@ -22,7 +22,7 @@ const Sidebar = () => {
     },
     {
       id: 'calendar',
-      label: 'Calendar',
+      label: 'Booking',
       icon: CalendarIcon,
     },
     {
