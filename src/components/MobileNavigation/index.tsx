@@ -98,7 +98,7 @@ const MobileNavigation = () => {
                   }}
                   className={`
                     rounded-xl transition-all duration-200 hover:bg-blue-50 cursor-pointer p-3
-                    ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md' : 'text-gray-700'}
+                    ${isSelected ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:bg-blue-600 shadow-md' : 'text-gray-700'}
                   `}
                 >
                   {/* @ts-expect-error Material Tailwind props */}

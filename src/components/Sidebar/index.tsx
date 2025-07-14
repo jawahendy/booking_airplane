@@ -52,7 +52,7 @@ const Sidebar = () => {
                     className={`
                       group w-12 h-12 rounded-xl transition-all duration-200 cursor-pointer p-0 flex justify-center items-center
                       ${isSelected 
-                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25' 
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/25' 
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-500 hover:shadow-md'
                       }
                     `}

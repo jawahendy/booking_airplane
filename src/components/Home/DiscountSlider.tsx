@@ -33,7 +33,7 @@ const DiscountSlider: React.FC<DiscountSliderProps> = ({ discounts, className = 
               <div className="relative">
                 <div className="absolute -inset-2 bg-gradient-to-r from-sky-400/20 via-blue-400/20 to-cyan-400/20 rounded-lg blur-md animate-pulse"></div>
                 <div className="relative">
-                  <h3 className="text-xl font-black text-light-blue-400">
+                  <h3 className="text-xl font-black text-blue-800">
                     Special Discounts
                   </h3>
                 </div>

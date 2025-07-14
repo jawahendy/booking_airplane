@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { m } from 'framer-motion';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, PlaneTakeoffIcon, ClockIcon, MapPinIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, PlaneTakeoffIcon, ClockIcon, MapPinIcon} from 'lucide-react';
 
 interface FlightCardProps {
   airline: string;
@@ -13,7 +13,298 @@ interface FlightCardProps {
   price: string;
   duration: string;
   available: boolean;
+  onBook: () => void;
 }
+
+interface BookingFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  seatClass: string;
+  seatNumber: string;
+}
+
+interface BookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  flight: FlightCardProps | null;
+  selectedDate: Date;
+}
+
+// Flight data organized by date
+const flightsByDate: { [key: string]: FlightCardProps[] } = {
+  '2025-07-15': [
+    {
+      airline: "Garuda Indonesia",
+      flightNumber: "GA 152",
+      departure: "CGK Jakarta",
+      arrival: "DPS Bali",
+      departureTime: "08:30",
+      arrivalTime: "11:45",
+      price: "Rp 1,200,000",
+      duration: "2h 15m",
+      available: true,
+      onBook: () => {}
+    },
+    {
+      airline: "Lion Air",
+      flightNumber: "JT 930",
+      departure: "CGK Jakarta",
+      arrival: "DPS Bali",
+      departureTime: "14:20",
+      arrivalTime: "17:35",
+      price: "Rp 1,500,000",
+      duration: "2h 15m",
+      available: true,
+      onBook: () => {}
+    }
+  ],
+  '2025-07-16': [
+    {
+      airline: "Singapore Airlines",
+      flightNumber: "SQ 740",
+      departure: "CGK Jakarta",
+      arrival: "DPS Bali",
+      departureTime: "19:45",
+      arrivalTime: "23:00",
+      price: "Rp 1,800,000",
+      duration: "2h 15m",
+      available: true,
+      onBook: () => {}
+    },
+    {
+      airline: "AirAsia",
+      flightNumber: "QZ 8398",
+      departure: "CGK Jakarta",
+      arrival: "DPS Bali",
+      departureTime: "12:30",
+      arrivalTime: "15:45",
+      price: "Rp 950,000",
+      duration: "2h 15m",
+      available: true,
+      onBook: () => {}
+    }
+  ],
+  '2025-07-17': [
+    {
+      airline: "Citilink",
+      flightNumber: "QG 9247",
+      departure: "CGK Jakarta",
+      arrival: "DPS Bali",
+      departureTime: "07:00",
+      arrivalTime: "10:15",
+      price: "Rp 1,100,000",
+      duration: "2h 15m",
+      available: true,
+      onBook: () => {}
+    }
+  ]
+};
+
+const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, selectedDate }) => {
+  const initialstate = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    seatClass: 'economy',
+    seatNumber: ''
+  }
+  const [formData, setFormData] = useState<BookingFormData>(initialstate);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert('Booking submitted successfully!');
+    setFormData(initialstate);
+    onClose();
+  };
+
+  if (!isOpen || !flight) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <m.div
+        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        initial={{ opacity: 0, scale: 0.8, y: 50 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="p-8">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-base sm:text-xl font-bold text-gray-900">Complete Your Booking</h2>
+            <button
+              onClick={onClose}
+              className="text-black p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ChevronLeftIcon className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Flight Summary */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8">
+            <h3 className="font-bold text-lg text-gray-900 mb-4">Flight Summary</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Airline & Flight</p>
+                <p className="font-semibold text-gray-900">{flight.airline} {flight.flightNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Date</p>
+                <p className="font-semibold text-gray-900">
+                  {selectedDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Route</p>
+                <p className="font-semibold text-gray-900">{flight.departure} → {flight.arrival}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Time</p>
+                <p className="font-semibold text-gray-900">{flight.departureTime} - {flight.arrivalTime}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Duration</p>
+                <p className="font-semibold text-gray-900">{flight.duration}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Price</p>
+                <p className="font-bold text-2xl text-blue-600">{flight.price}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  required
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter your first name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  required
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter your last name"
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Seat Class
+                </label>
+                <select
+                  name="seatClass"
+                  value={formData.seatClass}
+                  onChange={handleInputChange}
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="economy">Economy Class</option>
+                  <option value="premium">Premium Economy</option>
+                  <option value="business">Business Class</option>
+                  <option value="first">First Class</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preferred Seat
+                </label>
+                <input
+                  type="text"
+                  name="seatNumber"
+                  value={formData.seatNumber}
+                  onChange={handleInputChange}
+                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="e.g., 12A (optional)"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Book Now
+              </button>
+            </div>
+          </form>
+        </div>
+      </m.div>
+    </div>
+  );
+};
 
 const FlightCard: React.FC<FlightCardProps> = ({
   airline,
@@ -24,7 +315,8 @@ const FlightCard: React.FC<FlightCardProps> = ({
   arrivalTime,
   price,
   duration,
-  available
+  available,
+  onBook
 }) => (
   <m.div
     className={`bg-white rounded-xl shadow-md border transition-all duration-300 p-5 relative overflow-hidden hover:shadow-lg ${
@@ -104,10 +396,11 @@ const FlightCard: React.FC<FlightCardProps> = ({
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
           disabled={!available}
+          onClick={onBook}
           whileHover={available ? { scale: 1.02 } : {}}
           whileTap={available ? { scale: 0.98 } : {}}
         >
-          {available ? 'Select Flight' : 'Sold Out'}
+          {available ? 'Book Now' : 'Sold Out'}
         </m.button>
       </div>
     </div>
@@ -117,43 +410,23 @@ const FlightCard: React.FC<FlightCardProps> = ({
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [selectedFlight, setSelectedFlight] = useState<FlightCardProps | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-  // Enhanced flight data with better details
-  const flightData: FlightCardProps[] = [
-    {
-      airline: "Garuda Indonesia",
-      flightNumber: "GA 152",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "08:30",
-      arrivalTime: "11:45",
-      price: "Rp 1,200,000",
-      duration: "2h 15m",
-      available: true
-    },
-    {
-      airline: "Lion Air",
-      flightNumber: "JT 930",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "14:20",
-      arrivalTime: "17:35",
-      price: "Rp 1,500,000",
-      duration: "2h 15m",
-      available: true
-    },
-    {
-      airline: "Singapore Airlines",
-      flightNumber: "SQ 740",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "19:45",
-      arrivalTime: "23:00",
-      price: "Rp 1,800,000",
-      duration: "2h 15m",
-      available: false
-    }
-  ];
+  // Enhanced flight data organized by date
+  const getFlightsForDate = (date: Date): FlightCardProps[] => {
+    const dateKey = date.toISOString().split('T')[0];
+    const baseFlights = flightsByDate[dateKey] || [];
+    
+    // Add onBook handler to each flight
+    return baseFlights.map(flight => ({
+      ...flight,
+      onBook: () => {
+        setSelectedFlight(flight);
+        setIsBookingModalOpen(true);
+      }
+    }));
+  };
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -193,6 +466,12 @@ const CalendarPage = () => {
     return date.toDateString() === selectedDate.toDateString();
   };
 
+  const hasFlights = (date: Date | null) => {
+    if (!date) return false;
+    const dateKey = date.toISOString().split('T')[0];
+    return !!flightsByDate[dateKey];
+  };
+
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
       const newMonth = new Date(prev);
@@ -203,168 +482,359 @@ const CalendarPage = () => {
 
   const days = getDaysInMonth(currentMonth);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const currentFlights = getFlightsForDate(selectedDate);
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 relative">
-      <div className="max-w-7xl mx-auto p-6 pt-8">
-        {/* Calendar Card - Top Section */}
-        <m.div
-          className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-8 relative overflow-hidden"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Subtle decorative elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-50 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
-                  <CalendarIcon className="w-6 h-6 text-white" />
+    <div className="h-screen w-full bg-gray-50 relative overflow-hidden">
+      {/* Mobile Layout (md and below) */}
+      <div className="block lg:hidden h-full mt-12">
+        <div className="h-full p-4 overflow-y-auto">
+          {/* Mobile Calendar Card */}
+          <m.div
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-4 relative overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+            
+            <div className="relative z-10">
+              {/* Mobile Calendar Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <CalendarIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">{formatMonth(currentMonth)}</h1>
+                    <p className="text-sm text-gray-600">Select your travel date</p>
+                  </div>
                 </div>
-                {formatMonth(currentMonth)}
-              </h2>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => navigateMonth('prev')}
-                  className="p-3 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => navigateMonth('next')}
-                  className="p-3 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  <ChevronRightIcon className="w-5 h-5 text-gray-600" />
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => navigateMonth('prev')}
+                    className="p-2 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300"
+                  >
+                    <ChevronLeftIcon className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => navigateMonth('next')}
+                    className="p-2 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300"
+                  >
+                    <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Calendar Grid - Centered */}
-            <div className="max-w-2xl mx-auto">
-              <div className="grid grid-cols-7 gap-2 mb-6">
+              {/* Mobile Calendar Grid */}
+              <div className="grid grid-cols-7 gap-1 mb-4">
                 {weekDays.map(day => (
-                  <div key={day} className="p-4 text-center text-sm font-semibold text-gray-500 bg-gray-50 rounded-lg">
-                    {day}
+                  <div key={day} className="p-2 text-center text-xs font-semibold text-gray-500 bg-gray-50 rounded-lg">
+                    {day.slice(0, 3)}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-2 mb-8">
+              <div className="grid grid-cols-7 gap-1 mb-4">
                 {days.map((date, index) => (
                   <m.button
                     key={index}
                     onClick={() => date && setSelectedDate(date)}
                     disabled={!date}
-                    className={`p-4 text-center rounded-xl transition-all duration-300 font-medium relative ${
-                      !date
+                    className={`
+                      relative p-2 text-center rounded-lg transition-all duration-300 font-medium text-sm min-h-[40px] flex flex-col items-center justify-center
+                      ${!date
                         ? 'invisible'
                         : isSelected(date)
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg scale-105'
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
                         : isToday(date)
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200 shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700 hover:shadow-md hover:scale-105'
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : hasFlights(date)
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-white border border-gray-200 text-gray-700'
                     }`}
-                    whileHover={date ? { scale: 1.05 } : {}}
-                    whileTap={date ? { scale: 0.95 } : {}}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2, delay: index * 0.01 }}
+                    whileHover={date ? { scale: 1.02 } : {}}
+                    whileTap={date ? { scale: 0.98 } : {}}
                   >
-                    {date?.getDate()}
+                    {date && (
+                      <>
+                        <span className="text-sm font-bold">{date.getDate()}</span>
+                        {hasFlights(date) && (
+                          <div className="flex space-x-1 mt-1">
+                            <div className="w-1 h-1 bg-green-400 rounded-full"></div>
+                            <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </m.button>
                 ))}
               </div>
-            </div>
 
-            {/* Selected Date Display - Centered */}
-            <m.div
-              className="max-w-md mx-auto p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
-              <div className="flex items-center justify-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <CalendarIcon className="w-6 h-6 text-white" />
-                </div>
+              {/* Mobile Selected Date Info */}
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                 <div className="text-center">
-                  <p className="text-sm font-medium text-blue-600 mb-1">Selected Travel Date</p>
-                  <p className="text-lg font-bold text-blue-800">
+                  <p className="text-sm font-medium text-blue-600 mb-1">Selected Date</p>
+                  <p className="text-base font-bold text-blue-800">
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric' 
+                    })}
+                  </p>
+                  {currentFlights.length > 0 && (
+                    <p className="text-xs text-green-600 mt-1 font-medium">
+                      {currentFlights.length} flight{currentFlights.length > 1 ? 's' : ''} available
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </m.div>
+
+          {/* Mobile Flight Results */}
+          {currentFlights.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                  <PlaneTakeoffIcon className="w-5 h-5 text-blue-600 mr-2" />
+                  Available Flights
+                </h2>
+                <div className="text-xs text-green-600 font-medium">
+                  {currentFlights.length} found
+                </div>
+              </div>
+              {currentFlights.map((flight, index) => (
+                <m.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <FlightCard {...flight} />
+                </m.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <PlaneTakeoffIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-gray-900 mb-2">No Flights Available</h3>
+                <p className="text-gray-600 text-sm">
+                  No flights for {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Layout (lg and above) */}
+      <div className="hidden lg:grid lg:grid-cols-2 h-full mx-16 overflow-hidden">
+        {/* Left Side - Calendar */}
+        <div className="bg-white border-r border-gray-200 p-6 overflow-y-auto">
+          <m.div
+            className="h-full relative"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-20 w-48 h-48 bg-gradient-to-br from-blue-50 via-indigo-50 to-transparent rounded-full -translate-y-24 translate-x-24"></div>
+            
+            <div className="relative z-10 h-full flex flex-col">
+              {/* Desktop Calendar Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <CalendarIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">{formatMonth(currentMonth)}</h1>
+                    <p className="text-sm text-gray-600 mt-1">Select your travel date</p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => navigateMonth('prev')}
+                    className="p-3 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg group"
+                  >
+                    <ChevronLeftIcon className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
+                  </button>
+                  <button
+                    onClick={() => navigateMonth('next')}
+                    className="p-3 rounded-xl bg-gray-100 hover:bg-blue-50 transition-all duration-300 shadow-md hover:shadow-lg group"
+                  >
+                    <ChevronRightIcon className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop Calendar Grid */}
+              <div className="flex-1 flex flex-col">
+                {/* Week days header */}
+                <div className="grid grid-cols-7 gap-3 mb-4">
+                  {weekDays.map(day => (
+                    <div key={day} className="p-3 text-center text-sm font-bold text-gray-600 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl shadow-sm">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar days */}
+                <div className="grid grid-cols-7 gap-3 flex-1">
+                  {days.map((date, index) => (
+                    <m.button
+                      key={index}
+                      onClick={() => date && setSelectedDate(date)}
+                      disabled={!date}
+                      className={`
+                        relative p-4 text-center rounded-xl transition-all duration-300 font-semibold text-base min-h-[60px] flex flex-col items-center justify-center
+                        ${!date
+                          ? 'invisible'
+                          : isSelected(date)
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl scale-105 transform'
+                          : isToday(date)
+                          ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 shadow-lg'
+                          : hasFlights(date)
+                          ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100 hover:shadow-lg hover:scale-105'
+                          : 'bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:shadow-lg hover:scale-105'
+                      }`}
+                      whileHover={date ? { scale: 1.05 } : {}}
+                      whileTap={date ? { scale: 0.95 } : {}}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: index * 0.01 }}
+                    >
+                      {date && (
+                        <>
+                          <span className="text-xl font-bold">{date.getDate()}</span>
+                          {hasFlights(date) && (
+                            <div className="flex space-x-1 mt-1">
+                              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </m.button>
+                  ))}
+                </div>
+
+                {/* Desktop Selected Date Info */}
+                <m.div
+                  className="mt-6 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border-2 border-blue-200 shadow-lg"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <CalendarIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-blue-600 mb-1">Selected Travel Date</p>
+                      <p className="text-lg font-bold text-blue-800">
+                        {selectedDate.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                      {currentFlights.length > 0 && (
+                        <p className="text-sm text-green-600 mt-1 font-medium">
+                          {currentFlights.length} flight{currentFlights.length > 1 ? 's' : ''} available
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </m.div>
+              </div>
+            </div>
+          </m.div>
+        </div>
+
+        {/* Right Side - Flight Results */}
+        <div className="bg-gray-50 p-6 overflow-y-auto">
+          <m.div
+            className="h-full"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {currentFlights.length > 0 ? (
+              <div className="h-full flex flex-col">
+                {/* Available Flights Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+                      <PlaneTakeoffIcon className="w-5 h-5 text-white" />
+                    </div>
+                    Available Flights
+                  </h2>
+                  <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-xl border border-green-200">
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="font-semibold text-green-700 text-sm">
+                      {currentFlights.length} flight{currentFlights.length > 1 ? 's' : ''} found
+                    </span>
+                  </div>
+                </div>
+
+                {/* Flight Cards */}
+                <div className="flex-1 space-y-4">
+                  {currentFlights.map((flight, index) => (
+                    <m.div
+                      key={index}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <FlightCard {...flight} />
+                    </m.div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* No Flights Message */
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <PlaneTakeoffIcon className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">No Flights Available</h3>
+                  <p className="text-gray-600 mb-2">
+                    No flights are currently available for
+                  </p>
+                  <p className="text-gray-900 font-semibold">
                     {selectedDate.toLocaleDateString('en-US', { 
                       weekday: 'long', 
-                      year: 'numeric', 
                       month: 'long', 
-                      day: 'numeric' 
+                      day: 'numeric',
+                      year: 'numeric'
                     })}
+                  </p>
+                  <p className="text-gray-500 text-sm mt-4">
+                    Please select a different date or check back later for updated flight schedules.
                   </p>
                 </div>
               </div>
-            </m.div>
-          </div>
-        </m.div>
-
-        {/* Available Flights Header */}
-        <m.div
-          className="mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
-                <PlaneTakeoffIcon className="w-6 h-6 text-white" />
-              </div>
-              Available Flights
-            </h2>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="font-medium">3 flights found</span>
-            </div>
-          </div>
-        </m.div>
-
-        {/* Flight Cards - Bottom Grid Layout */}
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {flightData.map((flight, index) => (
-            <m.div
-              key={index}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-            >
-              <FlightCard {...flight} />
-            </m.div>
-          ))}
+            )}
+          </m.div>
         </div>
-
-        {/* Additional Options */}
-        <m.div
-          className="mt-8 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <PlaneTakeoffIcon className="w-4 h-4 text-white" />
-              </div>
-              <p className="text-gray-700 font-semibold text-lg">Looking for more options?</p>
-            </div>
-            <a 
-              href="#" 
-              className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              View All Flights
-              <ChevronRightIcon className="w-5 h-5 ml-2" />
-            </a>
-          </div>
-        </m.div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false);
+          setSelectedFlight(null);
+        }}
+        flight={selectedFlight}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 };
