@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { m } from 'framer-motion';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, PlaneTakeoffIcon, ClockIcon, MapPinIcon} from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, PlaneTakeoffIcon, ClockIcon, MapPinIcon } from 'lucide-react';
+import { Select, Option, Input } from "@material-tailwind/react";
 
 interface FlightCardProps {
   airline: string;
@@ -75,14 +76,14 @@ const calculateArrivalTime = (departureTime: string, duration: string): string =
   const [depHour, depMin] = departureTime.split(':').map(Number);
   const durationMatch = duration.match(/(\d+)h\s*(\d+)m/);
   if (!durationMatch) return departureTime;
-  
+
   const durHours = parseInt(durationMatch[1]);
   const durMinutes = parseInt(durationMatch[2]);
-  
+
   const totalMinutes = depHour * 60 + depMin + durHours * 60 + durMinutes;
   const arrHour = Math.floor(totalMinutes / 60) % 24;
   const arrMin = totalMinutes % 60;
-  
+
   return `${arrHour.toString().padStart(2, '0')}:${arrMin.toString().padStart(2, '0')}`;
 };
 
@@ -94,36 +95,36 @@ const formatPrice = (price: number): string => {
 // Generate flights for a specific date
 const generateFlightsForDate = (date: Date): FlightCardProps[] => {
   const flights: FlightCardProps[] = [];
-  
+
   // Use date as seed for consistent random generation
   const seed = date.getTime();
   const random = (index: number) => {
     const x = Math.sin(seed + index) * 10000;
     return x - Math.floor(x);
   };
-  
+
   // 15% chance of no flights available (random days with no flights)
   const hasNoFlights = random(999) < 0.15;
   if (hasNoFlights) {
     return []; // Return empty array for no flights
   }
-  
+
   // Generate 1-6 flights per day randomly (including possibility of just 1 flight)
   const flightCount = Math.floor(random(0) * 6) + 1;
-  
+
   for (let i = 0; i < flightCount; i++) {
     const airline = airlines[Math.floor(random(i * 3) * airlines.length)];
     const route = routes[Math.floor(random(i * 3 + 1) * routes.length)];
     const departureTime = timeSlots[Math.floor(random(i * 3 + 2) * timeSlots.length)];
     const arrivalTime = calculateArrivalTime(departureTime, route.baseDuration);
-    
+
     // Add some price variation
     const priceVariation = 0.8 + (random(i * 4) * 0.4); // 0.8 to 1.2 multiplier
     const finalPrice = Math.round(route.basePrice * airline.priceMultiplier * priceVariation);
-    
+
     // Random availability (85% chance of being available, 15% sold out)
     const available = random(i * 5) > 0.15;
-    
+
     flights.push({
       airline: airline.name,
       flightNumber: generateFlightNumber(airline.code),
@@ -134,13 +135,13 @@ const generateFlightsForDate = (date: Date): FlightCardProps[] => {
       price: formatPrice(finalPrice),
       duration: route.baseDuration,
       available,
-      onBook: () => {}
+      onBook: () => { }
     });
   }
-  
+
   // Sort flights by departure time
   flights.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
-  
+
   return flights;
 };
 
@@ -150,11 +151,11 @@ const flightDataCache = new Map<string, FlightCardProps[]>();
 // Get flights for any date with caching
 const getFlightsByDate = (date: Date): FlightCardProps[] => {
   const dateKey = date.toISOString().split('T')[0];
-  
+
   if (!flightDataCache.has(dateKey)) {
     flightDataCache.set(dateKey, generateFlightsForDate(date));
   }
-  
+
   return flightDataCache.get(dateKey) || [];
 };
 
@@ -175,6 +176,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSeatClassChange = (value: string | undefined) => {
+    if (value) {
+      setFormData(prev => ({
+        ...prev,
+        seatClass: value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -217,11 +227,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
               <div>
                 <p className="text-sm text-gray-600">Date</p>
                 <p className="font-semibold text-gray-900">
-                  {selectedDate.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {selectedDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </p>
               </div>
@@ -251,28 +261,48 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   First Name
                 </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Enter your first name"
-                />
+                <div>
+                  <Input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Enter your first name"
+                    size="lg"
+                    className="!border-gray-300 focus:!border-blue-500 rounded-xl "
+                    labelProps={{
+                      className: "hidden"
+                    }}
+                    onPointerEnterCapture={undefined}
+                    onPointerLeaveCapture={undefined}
+                    crossOrigin={undefined}
+                    onResize={undefined}
+                    onResizeCapture={undefined}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Last Name
                 </label>
-                <input
+                <Input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Enter your last name"
+                  size="lg"
+                  className="!border-gray-300 focus:!border-blue-500 rounded-xl"
+                  labelProps={{
+                    className: "hidden"
+                  }}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                  crossOrigin={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                 />
               </div>
             </div>
@@ -282,13 +312,22 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
-                <input
+                <Input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  size="lg"
+                  className="!border-gray-300 focus:!border-blue-500 rounded-xl"
+                  labelProps={{
+                    className: "hidden"
+                  }}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                  crossOrigin={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                   placeholder="Enter your email"
                 />
               </div>
@@ -296,13 +335,22 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Phone Number
                 </label>
-                <input
+                <Input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  size="lg"
+                  className="!border-gray-300 focus:!border-blue-500 rounded-xl"
+                  labelProps={{
+                    className: "hidden"
+                  }}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                  crossOrigin={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -313,29 +361,46 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, se
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Seat Class
                 </label>
-                <select
-                  name="seatClass"
+                <Select
                   value={formData.seatClass}
-                  onChange={handleInputChange}
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  onChange={handleSeatClassChange}
+                  size="lg"
+                  className="!border-gray-300 focus:!border-blue-500 rounded-xl"
+                  labelProps={{
+                    className: "hidden"
+                  }}
+                  placeholder="Select seat class"
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                 >
-                  <option value="economy">Economy Class</option>
-                  <option value="premium">Premium Economy</option>
-                  <option value="business">Business Class</option>
-                  <option value="first">First Class</option>
-                </select>
+                  <Option value="economy">Economy Class</Option>
+                  <Option value="premium">Premium Economy</Option>
+                  <Option value="business">Business Class</Option>
+                  <Option value="first">First Class</Option>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preferred Seat
                 </label>
-                <input
+                <Input
                   type="text"
                   name="seatNumber"
                   value={formData.seatNumber}
                   onChange={handleInputChange}
-                  className="text-black w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="e.g., 12A (optional)"
+                  required
+                  size="lg"
+                  className="!border-gray-300 focus:!border-blue-500 rounded-xl"
+                  labelProps={{
+                    className: "hidden"
+                  }}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                  crossOrigin={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined} placeholder="e.g., 12A (optional)"
                 />
               </div>
             </div>
@@ -375,11 +440,10 @@ const FlightCard: React.FC<FlightCardProps> = ({
   onBook
 }) => (
   <m.div
-    className={` bg-white rounded-xl shadow-md border transition-all duration-300 p-5 relative overflow-hidden hover:shadow-lg ${
-      available 
-        ? 'border-gray-100 hover:border-blue-200' 
+    className={` bg-white rounded-xl shadow-md border transition-all duration-300 p-5 relative overflow-hidden hover:shadow-lg ${available
+        ? 'border-gray-100 hover:border-blue-200'
         : 'border-gray-100 opacity-70'
-    }`}
+      }`}
     whileHover={available ? { scale: 1.01, y: -2 } : {}}
     initial={{ opacity: 0, y: 15 }}
     animate={{ opacity: 1, y: 0 }}
@@ -387,7 +451,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
   >
     {/* Status indicator */}
     <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${available ? 'bg-green-400' : 'bg-red-400'}`}></div>
-    
+
     <div className="relative z-10">
       <div className="flex justify-between items-start mb-5">
         <div className="flex items-center space-x-3">
@@ -404,7 +468,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
           <p className="text-xs text-gray-500 font-medium">per person</p>
         </div>
       </div>
-      
+
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center space-x-3">
           <div className="mb-1 w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
@@ -415,7 +479,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
             <p className="text-sm text-gray-600">{departure}</p>
           </div>
         </div>
-        
+
         <div className="flex-1 mx-4 relative">
           <div className="border-t border-gray-300 border-dashed relative">
             <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-white px-1">
@@ -428,7 +492,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
             <p className="text-xs text-gray-500">{duration}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <div className="text-right">
             <p className="font-semibold text-gray-900">{arrivalTime}</p>
@@ -439,18 +503,17 @@ const FlightCard: React.FC<FlightCardProps> = ({
           </div>
         </div>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <ClockIcon className="w-4 h-4" />
           <span>{duration} flight</span>
         </div>
         <m.button
-          className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
-            available
+          className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${available
               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+            }`}
           disabled={!available}
           onClick={onBook}
           whileHover={available ? { scale: 1.02 } : {}}
@@ -472,7 +535,7 @@ const CalendarPage = () => {
   // Enhanced flight data organized by date
   const getFlightsForDate = (date: Date): FlightCardProps[] => {
     const baseFlights = getFlightsByDate(date);
-    
+
     // Add onBook handler to each flight
     return baseFlights.map((flight: FlightCardProps) => ({
       ...flight,
@@ -492,17 +555,17 @@ const CalendarPage = () => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
@@ -552,7 +615,7 @@ const CalendarPage = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-            
+
             <div className="relative z-10">
               {/* Mobile Calendar Header */}
               <div className="flex items-center justify-between mb-6">
@@ -601,13 +664,13 @@ const CalendarPage = () => {
                       ${!date
                         ? 'invisible'
                         : isSelected(date)
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-                        : isToday(date)
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : hasFlights(date)
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-white border border-gray-200 text-gray-700'
-                    }`}
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
+                          : isToday(date)
+                            ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                            : hasFlights(date)
+                              ? 'bg-green-50 text-green-700 border border-green-200'
+                              : 'bg-white border border-gray-200 text-gray-700'
+                      }`}
                     whileHover={date ? { scale: 1.02 } : {}}
                     whileTap={date ? { scale: 0.98 } : {}}
                   >
@@ -631,10 +694,10 @@ const CalendarPage = () => {
                 <div className="text-center">
                   <p className="text-sm font-medium text-blue-600 mb-1">Selected Date</p>
                   <p className="text-base font-bold text-blue-800">
-                    {selectedDate.toLocaleDateString('en-US', { 
-                      month: 'short', 
+                    {selectedDate.toLocaleDateString('en-US', {
+                      month: 'short',
                       day: 'numeric',
-                      year: 'numeric' 
+                      year: 'numeric'
                     })}
                   </p>
                   {currentFlights.length > 0 && (
@@ -696,7 +759,7 @@ const CalendarPage = () => {
           >
             {/* Decorative background elements */}
             <div className="absolute top-0 right-20 w-48 h-48 bg-gradient-to-br from-blue-50 via-indigo-50 to-transparent rounded-full -translate-y-24 translate-x-24"></div>
-            
+
             <div className="relative z-10 h-full flex flex-col">
               {/* Desktop Calendar Header */}
               <div className="flex items-center justify-between mb-8">
@@ -748,13 +811,13 @@ const CalendarPage = () => {
                         ${!date
                           ? 'invisible'
                           : isSelected(date)
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl scale-105 transform'
-                          : isToday(date)
-                          ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 shadow-lg'
-                          : hasFlights(date)
-                          ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100 hover:shadow-lg hover:scale-105'
-                          : 'bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:shadow-lg hover:scale-105'
-                      }`}
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-xl scale-105 transform'
+                            : isToday(date)
+                              ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 shadow-lg'
+                              : hasFlights(date)
+                                ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100 hover:shadow-lg hover:scale-105'
+                                : 'bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:shadow-lg hover:scale-105'
+                        }`}
                       whileHover={date ? { scale: 1.05 } : {}}
                       whileTap={date ? { scale: 0.95 } : {}}
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -791,11 +854,11 @@ const CalendarPage = () => {
                     <div>
                       <p className="text-sm font-semibold text-blue-600 mb-1">Selected Travel Date</p>
                       <p className="text-lg font-bold text-blue-800">
-                        {selectedDate.toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
+                        {selectedDate.toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
                         })}
                       </p>
                       {currentFlights.length > 0 && (
@@ -863,9 +926,9 @@ const CalendarPage = () => {
                     No flights are currently available for
                   </p>
                   <p className="text-gray-900 font-semibold">
-                    {selectedDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
+                    {selectedDate.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'long',
                       day: 'numeric',
                       year: 'numeric'
                     })}
