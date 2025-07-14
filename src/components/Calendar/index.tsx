@@ -32,74 +32,130 @@ interface BookingModalProps {
   selectedDate: Date;
 }
 
-// Flight data organized by date
-const flightsByDate: { [key: string]: FlightCardProps[] } = {
-  '2025-07-15': [
-    {
-      airline: "Garuda Indonesia",
-      flightNumber: "GA 152",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "08:30",
-      arrivalTime: "11:45",
-      price: "Rp 1,200,000",
-      duration: "2h 15m",
-      available: true,
+// Flight data generation
+const airlines = [
+  { name: "Garuda Indonesia", code: "GA", priceMultiplier: 1.2 },
+  { name: "Lion Air", code: "JT", priceMultiplier: 1.0 },
+  { name: "Singapore Airlines", code: "SQ", priceMultiplier: 1.5 },
+  { name: "AirAsia", code: "QZ", priceMultiplier: 0.8 },
+  { name: "Citilink", code: "QG", priceMultiplier: 0.9 },
+  { name: "Batik Air", code: "ID", priceMultiplier: 1.1 },
+  { name: "Sriwijaya Air", code: "SJ", priceMultiplier: 0.85 },
+  { name: "Nam Air", code: "IN", priceMultiplier: 0.95 }
+];
+
+const routes = [
+  { departure: "CGK Jakarta", arrival: "DPS Bali", baseDuration: "2h 15m", basePrice: 1200000 },
+  { departure: "CGK Jakarta", arrival: "JOG Yogyakarta", baseDuration: "1h 30m", basePrice: 800000 },
+  { departure: "CGK Jakarta", arrival: "MLG Malang", baseDuration: "1h 45m", basePrice: 900000 },
+  { departure: "CGK Jakarta", arrival: "SBY Surabaya", baseDuration: "1h 25m", basePrice: 750000 },
+  { departure: "CGK Jakarta", arrival: "MDN Medan", baseDuration: "2h 30m", basePrice: 1100000 },
+  { departure: "CGK Jakarta", arrival: "PLM Palembang", baseDuration: "1h 20m", basePrice: 650000 },
+  { departure: "CGK Jakarta", arrival: "BDO Bandung", baseDuration: "45m", basePrice: 500000 },
+  { departure: "DPS Bali", arrival: "CGK Jakarta", baseDuration: "2h 15m", basePrice: 1200000 },
+  { departure: "DPS Bali", arrival: "SBY Surabaya", baseDuration: "1h 10m", basePrice: 600000 },
+  { departure: "SBY Surabaya", arrival: "CGK Jakarta", baseDuration: "1h 25m", basePrice: 750000 }
+];
+
+const timeSlots = [
+  "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30",
+  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"
+];
+
+// Generate random flight number
+const generateFlightNumber = (airlineCode: string): string => {
+  const number = Math.floor(Math.random() * 9000) + 1000;
+  return `${airlineCode} ${number}`;
+};
+
+// Calculate arrival time based on departure time and duration
+const calculateArrivalTime = (departureTime: string, duration: string): string => {
+  const [depHour, depMin] = departureTime.split(':').map(Number);
+  const durationMatch = duration.match(/(\d+)h\s*(\d+)m/);
+  if (!durationMatch) return departureTime;
+  
+  const durHours = parseInt(durationMatch[1]);
+  const durMinutes = parseInt(durationMatch[2]);
+  
+  const totalMinutes = depHour * 60 + depMin + durHours * 60 + durMinutes;
+  const arrHour = Math.floor(totalMinutes / 60) % 24;
+  const arrMin = totalMinutes % 60;
+  
+  return `${arrHour.toString().padStart(2, '0')}:${arrMin.toString().padStart(2, '0')}`;
+};
+
+// Format price in Indonesian Rupiah
+const formatPrice = (price: number): string => {
+  return `Rp ${price.toLocaleString('id-ID')}`;
+};
+
+// Generate flights for a specific date
+const generateFlightsForDate = (date: Date): FlightCardProps[] => {
+  const flights: FlightCardProps[] = [];
+  
+  // Use date as seed for consistent random generation
+  const seed = date.getTime();
+  const random = (index: number) => {
+    const x = Math.sin(seed + index) * 10000;
+    return x - Math.floor(x);
+  };
+  
+  // 15% chance of no flights available (random days with no flights)
+  const hasNoFlights = random(999) < 0.15;
+  if (hasNoFlights) {
+    return []; // Return empty array for no flights
+  }
+  
+  // Generate 1-6 flights per day randomly (including possibility of just 1 flight)
+  const flightCount = Math.floor(random(0) * 6) + 1;
+  
+  for (let i = 0; i < flightCount; i++) {
+    const airline = airlines[Math.floor(random(i * 3) * airlines.length)];
+    const route = routes[Math.floor(random(i * 3 + 1) * routes.length)];
+    const departureTime = timeSlots[Math.floor(random(i * 3 + 2) * timeSlots.length)];
+    const arrivalTime = calculateArrivalTime(departureTime, route.baseDuration);
+    
+    // Add some price variation
+    const priceVariation = 0.8 + (random(i * 4) * 0.4); // 0.8 to 1.2 multiplier
+    const finalPrice = Math.round(route.basePrice * airline.priceMultiplier * priceVariation);
+    
+    // Random availability (85% chance of being available, 15% sold out)
+    const available = random(i * 5) > 0.15;
+    
+    flights.push({
+      airline: airline.name,
+      flightNumber: generateFlightNumber(airline.code),
+      departure: route.departure,
+      arrival: route.arrival,
+      departureTime,
+      arrivalTime,
+      price: formatPrice(finalPrice),
+      duration: route.baseDuration,
+      available,
       onBook: () => {}
-    },
-    {
-      airline: "Lion Air",
-      flightNumber: "JT 930",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "14:20",
-      arrivalTime: "17:35",
-      price: "Rp 1,500,000",
-      duration: "2h 15m",
-      available: true,
-      onBook: () => {}
-    }
-  ],
-  '2025-07-16': [
-    {
-      airline: "Singapore Airlines",
-      flightNumber: "SQ 740",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "19:45",
-      arrivalTime: "23:00",
-      price: "Rp 1,800,000",
-      duration: "2h 15m",
-      available: true,
-      onBook: () => {}
-    },
-    {
-      airline: "AirAsia",
-      flightNumber: "QZ 8398",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "12:30",
-      arrivalTime: "15:45",
-      price: "Rp 950,000",
-      duration: "2h 15m",
-      available: true,
-      onBook: () => {}
-    }
-  ],
-  '2025-07-17': [
-    {
-      airline: "Citilink",
-      flightNumber: "QG 9247",
-      departure: "CGK Jakarta",
-      arrival: "DPS Bali",
-      departureTime: "07:00",
-      arrivalTime: "10:15",
-      price: "Rp 1,100,000",
-      duration: "2h 15m",
-      available: true,
-      onBook: () => {}
-    }
-  ]
+    });
+  }
+  
+  // Sort flights by departure time
+  flights.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+  
+  return flights;
+};
+
+// Dynamic flight data cache
+const flightDataCache = new Map<string, FlightCardProps[]>();
+
+// Get flights for any date with caching
+const getFlightsByDate = (date: Date): FlightCardProps[] => {
+  const dateKey = date.toISOString().split('T')[0];
+  
+  if (!flightDataCache.has(dateKey)) {
+    flightDataCache.set(dateKey, generateFlightsForDate(date));
+  }
+  
+  return flightDataCache.get(dateKey) || [];
 };
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, flight, selectedDate }) => {
@@ -319,7 +375,7 @@ const FlightCard: React.FC<FlightCardProps> = ({
   onBook
 }) => (
   <m.div
-    className={`bg-white rounded-xl shadow-md border transition-all duration-300 p-5 relative overflow-hidden hover:shadow-lg ${
+    className={` bg-white rounded-xl shadow-md border transition-all duration-300 p-5 relative overflow-hidden hover:shadow-lg ${
       available 
         ? 'border-gray-100 hover:border-blue-200' 
         : 'border-gray-100 opacity-70'
@@ -415,11 +471,10 @@ const CalendarPage = () => {
 
   // Enhanced flight data organized by date
   const getFlightsForDate = (date: Date): FlightCardProps[] => {
-    const dateKey = date.toISOString().split('T')[0];
-    const baseFlights = flightsByDate[dateKey] || [];
+    const baseFlights = getFlightsByDate(date);
     
     // Add onBook handler to each flight
-    return baseFlights.map(flight => ({
+    return baseFlights.map((flight: FlightCardProps) => ({
       ...flight,
       onBook: () => {
         setSelectedFlight(flight);
@@ -468,8 +523,8 @@ const CalendarPage = () => {
 
   const hasFlights = (date: Date | null) => {
     if (!date) return false;
-    const dateKey = date.toISOString().split('T')[0];
-    return !!flightsByDate[dateKey];
+    const flights = getFlightsByDate(date);
+    return flights.length > 0;
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -542,7 +597,7 @@ const CalendarPage = () => {
                     onClick={() => date && setSelectedDate(date)}
                     disabled={!date}
                     className={`
-                      relative p-2 text-center rounded-lg transition-all duration-300 font-medium text-sm min-h-[40px] flex flex-col items-center justify-center
+                      relative p-2 text-center rounded-xl transition-all duration-300 font-medium text-sm min-h-[40px] flex flex-col items-center justify-center
                       ${!date
                         ? 'invisible'
                         : isSelected(date)
@@ -594,7 +649,7 @@ const CalendarPage = () => {
 
           {/* Mobile Flight Results */}
           {currentFlights.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 mb-10">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center">
                   <PlaneTakeoffIcon className="w-5 h-5 text-blue-600 mr-2" />
@@ -630,7 +685,7 @@ const CalendarPage = () => {
       </div>
 
       {/* Desktop Layout (lg and above) */}
-      <div className="hidden lg:grid lg:grid-cols-2 h-full mx-16 overflow-hidden">
+      <div className="hidden lg:grid lg:grid-cols-2 h-full ml-16 overflow-hidden">
         {/* Left Side - Calendar */}
         <div className="bg-white border-r border-gray-200 p-6 overflow-y-auto">
           <m.div

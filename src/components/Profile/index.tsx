@@ -176,7 +176,7 @@ const ProfilePage = () => {
   const userData = {
     name: "Hendy Nurfrianto",
     email: "hendyn25@gmail.com",
-    phone: "+62 812 3456 7890",
+    phone: "+62 857 1622 1255",
     memberSince: "January 2020",
     totalFlights: 12,
     milesEarned: "25,400",
@@ -298,7 +298,7 @@ const ProfilePage = () => {
               }`}
             >
               <PlaneTakeoffIcon className="w-5 h-5" />
-              <span>My Bookings</span>
+              <span className='text-sm sm:text-base'>My Bookings</span>
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -309,7 +309,7 @@ const ProfilePage = () => {
               }`}
             >
               <SettingsIcon className="w-5 h-5" />
-              <span>Settings</span>
+              <span className='text-sm sm:text-base'>Settings</span>
             </button>
           </div>
         </m.div>
@@ -323,7 +323,7 @@ const ProfilePage = () => {
           >
             {/* Bookings Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
                 <PlaneTakeoffIcon className="w-6 h-6 mr-3 text-blue-600" />
                 Your Flight Bookings
               </h2>
