@@ -1,8 +1,8 @@
 ## Developer: Booking Airplane
-Name: Hendy Nurfrianto
-Email: hendyn25@gmail.com
-GitHub: https://github.com/jawahendy
-website: https://hendy-nurfrianto.vercel.app
+- Name: Hendy Nurfrianto
+- Email: hendyn25@gmail.com
+- GitHub: https://github.com/jawahendy
+- website: https://hendy-nurfrianto.vercel.app
 
 ## Booking Airplane
 
